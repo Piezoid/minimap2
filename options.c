@@ -35,6 +35,8 @@ void mm_mapopt_init(mm_mapopt_t *opt)
 
 	opt->a = 2, opt->b = 4, opt->q = 4, opt->e = 2, opt->q2 = 24, opt->e2 = 1;
 	opt->sc_ambi = 1;
+	opt->noncan = 9;
+	opt->specified_intron_score = -1;
 	opt->zdrop = 400, opt->zdrop_inv = 200;
 	opt->end_bonus = -1;
 	opt->min_dp_max = opt->min_chain_score * opt->a;
@@ -51,6 +53,8 @@ void mm_mapopt_update(mm_mapopt_t *opt, const mm_idx_t *mi)
 {
 	if ((opt->flag & MM_F_SPLICE_FOR) || (opt->flag & MM_F_SPLICE_REV) || (mi->splices != 0))
 		opt->flag |= MM_F_SPLICE;
+	if (opt->specified_intron_score < 0)
+		opt->specified_intron_score = opt->noncan / 2;
 	if (opt->mid_occ <= 0)
 		opt->mid_occ = mm_idx_cal_max_occ(mi, opt->mid_occ_frac);
 	if (opt->mid_occ < opt->min_mid_occ)
@@ -124,6 +128,7 @@ int mm_set_opt(const char *preset, mm_idxopt_t *io, mm_mapopt_t *mo)
 		mo->flag |= MM_F_SPLICE | MM_F_SPLICE_FOR | MM_F_SPLICE_REV | MM_F_SPLICE_FLANK;
 		mo->max_gap = 2000, mo->max_gap_ref = mo->bw = 200000;
 		mo->a = 1, mo->b = 2, mo->q = 2, mo->e = 1, mo->q2 = 32, mo->e2 = 0;
+		mo->specified_intron_score = -1;
 		mo->noncan = 9;
 		mo->zdrop = 200, mo->zdrop_inv = 100; // because mo->a is halved
 	} else return -1;

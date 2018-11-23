@@ -35,6 +35,7 @@ static ko_longopt_t long_options[] = {
 	{ "print-aln-seq",  ko_no_argument,       309 },
 	{ "splice",         ko_no_argument,       310 },
 	{ "cost-non-gt-ag", ko_required_argument, 'C' },
+	{ "specintron-sc",  ko_required_argument, 'S' },
 	{ "no-long-join",   ko_no_argument,       312 },
 	{ "sr",             ko_no_argument,       313 },
 	{ "frag",           ko_required_argument, 314 },
@@ -99,7 +100,7 @@ static inline void yes_or_no(mm_mapopt_t *opt, int flag, int long_idx, const cha
 
 int main(int argc, char *argv[])
 {
-	const char *opt_str = "2aSDw:k:K:t:r:f:Vv:g:G:I:d:XT:s:x:Hcp:M:n:z:A:B:O:E:m:N:Qu:R:hF:LC:yYPo:";
+	const char *opt_str = "2aDw:k:K:t:r:f:Vv:g:G:I:d:XT:s:x:Hcp:M:n:z:A:B:O:E:m:N:Qu:R:hF:LC:S:
 	ketopt_t o = KETOPT_INIT;
 	mm_mapopt_t opt;
 	mm_idxopt_t ipt;
@@ -160,6 +161,7 @@ int main(int argc, char *argv[])
 		else if (c == 'B') opt.b = atoi(o.arg);
 		else if (c == 's') opt.min_dp_max = atoi(o.arg);
 		else if (c == 'C') opt.noncan = atoi(o.arg);
+		else if (c == 'S') opt.specified_intron_score = atoi(o.arg);
 		else if (c == 'I') ipt.batch_size = mm_parse_num(o.arg);
 		else if (c == 'K') opt.mini_batch_size = (int)mm_parse_num(o.arg);
 		else if (c == 'R') rg = o.arg;
@@ -223,10 +225,6 @@ int main(int argc, char *argv[])
 			yes_or_no(&opt, MM_F_HEAP_SORT, o.longidx, o.arg, 1);
 		} else if (c == 326) { // --dual
 			yes_or_no(&opt, MM_F_NO_DUAL, o.longidx, o.arg, 0);
-		} else if (c == 'S') {
-			opt.flag |= MM_F_OUT_CS | MM_F_CIGAR | MM_F_OUT_CS_LONG;
-			if (mm_verbose >= 2)
-				fprintf(stderr, "[WARNING]\033[1;31m option -S is deprecated and may be removed in future. Please use --cs=long instead.\033[0m\n");
 		} else if (c == 'V') {
 			puts(MM_VERSION);
 			return 0;
@@ -303,6 +301,8 @@ int main(int argc, char *argv[])
 		fprintf(fp_help, "    -z INT[,INT] Z-drop score and inversion Z-drop score [%d,%d]\n", opt.zdrop, opt.zdrop_inv);
 		fprintf(fp_help, "    -s INT       minimal peak DP alignment score [%d]\n", opt.min_dp_max);
 		fprintf(fp_help, "    -u CHAR      how to find GT-AG. f:transcript strand, b:both strands, n:don't match GT-AG [n]\n");
+		fprintf(fp_help, "    -C INT       Cost for a non-canonical GT-AG  splicing [%d]\n", opt.noncan);
+		fprintf(fp_help, "    -S INT       gain for each use of specified splicing site [%d]\n", opt.specified_intron_score);
 		fprintf(fp_help, "  Input/Output:\n");
 		fprintf(fp_help, "    -a           output in the SAM format (PAF by default)\n");
 		fprintf(fp_help, "    -o FILE      output alignments to FILE [stdout]\n");
